@@ -1,0 +1,18 @@
+using newsletter_form_api.Dal.Repositories.Interfaces;
+using newsletter_form_api.Models.Dtos;
+using newsletter_form_api.Services.Interfaces;
+using newsletter_form_api.Helpers;
+
+namespace newsletter_form_api.Services.Implementations
+{
+    public class InterestService(IInterestRepository repository) : IInterestService
+    {
+        private readonly IInterestRepository _repository = repository;
+
+        public async Task<List<InterestDto>> GetAllInterestsAsync()
+        {
+            var interests = await _repository.GetAllAsync();
+            return EntityMapper.ToDto(interests);
+        }
+    }
+}
