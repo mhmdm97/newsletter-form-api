@@ -1,0 +1,87 @@
+# .NET build output
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+*.tmp
+*.user
+*.userosscache
+*.suo
+*.userprefs
+*.pidb
+*.service
+.vs/
+.vscode/
+*_i.c
+*_p.c
+*.ilk
+*.meta
+*.obj
+*.pch
+*.pdb
+*.pgc
+*.pgd
+*.rsp
+*.sbr
+*.tlb
+*.tli
+*.tlh
+*.tmp_proj
+*_wpftmp.csproj
+*.log
+*.vspscc
+*.vssscc
+.builds
+*.svclog
+*.scc
+
+# NuGet packages
+*.nupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+*.nuget.props
+*.nuget.targets
+
+# Visual Studio cache files
+*.[Cc]ache
+!?*.[Cc]ache/
+
+# Build results
+[Dd]ebugPublic/
+[Rr]eleasePublic/
+[Pp]ublish/
+
+# SQL Server files
+*.mdf
+*.ldf
+*.ndf
+
+# Sensitive settings
+appsettings.*.json
+appsettings.json
+!appsettings.example.json
+*.Development.json
+local.settings.json
+
+# Test Results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+*.coverage
+*.coveragexml
+
+# Other common files to ignore
+.DS_Store
+Thumbs.db
+desktop.ini
+.env
+node_modules/
+.idea/
