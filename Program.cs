@@ -4,16 +4,53 @@ using newsletter_form_api.Dal.Repositories.Implementations;
 using newsletter_form_api.Dal.Repositories.Interfaces;
 using newsletter_form_api.Services.Implementations;
 using newsletter_form_api.Services.Interfaces;
+using OpenTelemetry.Exporter;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Define common resource attributes for all telemetry
+var resourceBuilder = ResourceBuilder.CreateDefault()
+    .AddService(
+        serviceName: "newsletter-form-api",
+        serviceVersion: typeof(Program).Assembly.GetName().Version?.ToString() ?? "unknown",
+        serviceInstanceId: Environment.MachineName)
+    .AddAttributes(new Dictionary<string, object>
+    {
+        ["deployment.environment"] = builder.Environment.EnvironmentName
+    });
+    
+// Configure OpenTelemetry logging
+builder.Logging.ClearProviders();
+builder.Logging.AddOpenTelemetry(options =>
+{
+    options
+        .SetResourceBuilder(resourceBuilder)
+        .AddOtlpExporter(a =>
+        {
+            a.Endpoint = new Uri(builder.Configuration["OpenTelemetry:Endpoint"]);
+            a.Protocol = Enum.Parse<OtlpExportProtocol>(builder.Configuration["OpenTelemetry:Protocol"]);
+            a.Headers = builder.Configuration["OpenTelemetry:Headers"];
+        });
+
+    // Add console exporter for local debugging
+    if (builder.Environment.IsDevelopment())
+    {
+        options.AddConsoleExporter();
+    }
+});
+
 builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<NewsletterDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
+    .UseLoggerFactory(null) //disable EF Core logging
+);
 
 // Add CORS policy
 builder.Services.AddCors(options =>

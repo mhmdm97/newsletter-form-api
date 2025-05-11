@@ -8,7 +8,7 @@ namespace newsletter_form_api.Controllers
     [ApiController]
     [Route("api/[controller]")]
     public class CommunicationPreferenceController(
-        ICommunicationPreferenceService communicationPreferenceService, 
+        ICommunicationPreferenceService communicationPreferenceService,
         ILogger<CommunicationPreferenceController> logger) : ControllerBase
     {
         private readonly ICommunicationPreferenceService _communicationPreferenceService = communicationPreferenceService;
@@ -19,12 +19,21 @@ namespace newsletter_form_api.Controllers
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetAllCommunicationPreferences()
         {
+            _logger.LogInformation("Starting GetAllCommunicationPreferences request");
+            
             try
             {
                 var result = await _communicationPreferenceService.GetAllCommunicationPreferencesAsync();
+                
                 if (result.IsFailure)
+                {
+                    _logger.LogWarning("GetAllCommunicationPreferences request failed: {ErrorMessage}", result.Error);
                     return StatusCode(500, ApiResponse<string>.Error(result.Error));
+                }
 
+                _logger.LogInformation("GetAllCommunicationPreferences request completed successfully, returned {PreferenceCount} preferences", 
+                    result.Value.Count);
+                    
                 return Ok(ApiResponse<List<CommunicationPreferenceDto>>.Ok(result.Value));
             }
             catch (Exception ex)
