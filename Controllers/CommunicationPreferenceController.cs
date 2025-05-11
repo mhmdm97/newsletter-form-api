@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using newsletter_form_api.Dal.Enums;
 using newsletter_form_api.Models.Dtos;
 using newsletter_form_api.Models.Responses;
 using newsletter_form_api.Services.Interfaces;
@@ -8,22 +7,30 @@ namespace newsletter_form_api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class CommunicationPreferenceController(ICommunicationPreferenceService communicationPreferenceService) : ControllerBase
+    public class CommunicationPreferenceController(
+        ICommunicationPreferenceService communicationPreferenceService, 
+        ILogger<CommunicationPreferenceController> logger) : ControllerBase
     {
         private readonly ICommunicationPreferenceService _communicationPreferenceService = communicationPreferenceService;
+        private readonly ILogger<CommunicationPreferenceController> _logger = logger;
 
         [HttpGet]
         [ProducesResponseType(typeof(ApiResponse<List<CommunicationPreferenceDto>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetAllCommunicationPreferences()
         {
             try
             {
-                var communicationPreferences = await _communicationPreferenceService.GetAllCommunicationPreferencesAsync();
-                return Ok(ApiResponse<List<CommunicationPreferenceDto>>.Ok(communicationPreferences));
+                var result = await _communicationPreferenceService.GetAllCommunicationPreferencesAsync();
+                if (result.IsFailure)
+                    return StatusCode(500, ApiResponse<string>.Error(result.Error));
+
+                return Ok(ApiResponse<List<CommunicationPreferenceDto>>.Ok(result.Value));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(500, ApiResponse<string>.Error("An error occurred while retrieving communication preferences"));
+                _logger.LogError(ex, "Error occurred while retrieving communication preferences");
+                return StatusCode(500, ApiResponse<string>.Error("An unexpected error occurred while retrieving communication preferences."));
             }
         }
     }

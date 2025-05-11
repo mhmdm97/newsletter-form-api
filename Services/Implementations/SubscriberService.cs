@@ -3,6 +3,7 @@ using newsletter_form_api.Dal.Repositories.Interfaces;
 using newsletter_form_api.Models.Dtos;
 using newsletter_form_api.Services.Interfaces;
 using newsletter_form_api.Helpers;
+using newsletter_form_api.Models.Results;
 
 namespace newsletter_form_api.Services.Implementations
 {
@@ -15,27 +16,27 @@ namespace newsletter_form_api.Services.Implementations
         private readonly IInterestRepository _interestRepository = interestRepository;
         private readonly ICommunicationPreferenceRepository _communicationPreferenceRepository = communicationPreferenceRepository;
 
-        public async Task<SubscriberDto> CreateSubscriberAsync(CreateSubscriberDto createDto)
+        public async Task<Result<SubscriberDto>> CreateSubscriberAsync(CreateSubscriberDto createDto)
         {
             // Validate email uniqueness
             if (await _subscriberRepository.EmailExistsAsync(createDto.Email))
-                throw new InvalidOperationException($"Subscriber with email {createDto.Email} already exists.");
+                return Result.Conflict<SubscriberDto>($"Subscriber with email {createDto.Email} already exists.");
 
             // Validate phone number uniqueness
             if (await _subscriberRepository.PhoneNumberExistsAsync(createDto.PhoneNumber))
-                throw new InvalidOperationException($"Subscriber with phone number {createDto.PhoneNumber} already exists.");
+                return Result.Conflict<SubscriberDto>($"Subscriber with phone number {createDto.PhoneNumber} already exists.");
 
             // Get interests from repository
             var interests = await _interestRepository.GetInterestsByIdsAsync(createDto.InterestIds);
 
             if (interests.Count != createDto.InterestIds.Count)
-                throw new ArgumentException("One or more interest IDs are invalid.");
+                return Result.ValidationError<SubscriberDto>("One or more interest IDs are invalid.");
 
             // Get communication preferences from repository
             var communicationPreferences = await _communicationPreferenceRepository.GetByIdsAsync(createDto.CommunicationPreferencesIds);
 
             if (communicationPreferences.Count != createDto.CommunicationPreferencesIds.Count)
-                throw new ArgumentException("One or more communication methods are invalid.");
+                return Result.ValidationError<SubscriberDto>("One or more communication methods are invalid.");
 
             // Create new subscriber
             var subscriber = new Subscriber
@@ -49,39 +50,41 @@ namespace newsletter_form_api.Services.Implementations
             };
 
             await _subscriberRepository.AddAsync(subscriber);
-            await _subscriberRepository.SaveChangesAsync();
+            var success = await _subscriberRepository.SaveChangesAsync();
 
-            return EntityMapper.ToDto(subscriber);
+            if (!success)
+                return Result.Failure<SubscriberDto>("Failed to save subscriber to database.");
+
+            return Result.Success(EntityMapper.ToDto(subscriber));
         }
 
-        public async Task<SubscriberDto?> GetSubscriberByIdAsync(int id)
+        public async Task<Result<SubscriberDto>> GetSubscriberByIdAsync(int id)
         {
             var subscriber = await _subscriberRepository.GetSubscriberWithDetailsAsync(id);
             if (subscriber == null)
-                return null;
-                
-            return EntityMapper.ToDto(subscriber);
+                return Result.NotFound<SubscriberDto>($"Subscriber with ID {id} not found.");
+
+            return Result.Success(EntityMapper.ToDto(subscriber));
         }
 
-        public async Task<List<SubscriberDto>> GetAllSubscribersAsync()
+        public async Task<Result<List<SubscriberDto>>> GetAllSubscribersAsync()
         {
             var subscribers = await _subscriberRepository.GetAllSubscribersWithDetailsAsync();
-            return EntityMapper.ToDto(subscribers);
+            return Result.Success(EntityMapper.ToDto(subscribers.ToList()));
         }
 
-        public async Task<bool> DeleteSubscriberAsync(int id)
+        public async Task<Result> DeleteSubscriberAsync(int id)
         {
             var subscriber = await _subscriberRepository.GetByIdAsync(id);
             if (subscriber == null)
-                return false;
+                return Result.NotFound($"Subscriber with ID {id} not found.");
 
             _subscriberRepository.Delete(subscriber);
-            return await _subscriberRepository.SaveChangesAsync();
-        }
+            var success = await _subscriberRepository.SaveChangesAsync();
 
-        public async Task<bool> SubscriberExistsAsync(string email)
-        {
-            return await _subscriberRepository.EmailExistsAsync(email);
+            return success
+                ? Result.Success()
+                : Result.Failure("Failed to delete subscriber.");
         }
     }
 }

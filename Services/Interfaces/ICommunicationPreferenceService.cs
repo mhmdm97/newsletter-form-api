@@ -1,10 +1,10 @@
-using newsletter_form_api.Dal.Enums;
 using newsletter_form_api.Models.Dtos;
+using newsletter_form_api.Models.Results;
 
 namespace newsletter_form_api.Services.Interfaces
 {
     public interface ICommunicationPreferenceService
     {
-        Task<List<CommunicationPreferenceDto>> GetAllCommunicationPreferencesAsync();
+        Task<Result<List<CommunicationPreferenceDto>>> GetAllCommunicationPreferencesAsync();
     }
 }

@@ -26,7 +26,7 @@ namespace newsletter_form_api.Dal.Repositories.Implementations
         public async Task<bool> EmailExistsAsync(string email)
         {
             return await _context.Subscribers
-                .AnyAsync(s => s.Email.Equals(email, StringComparison.CurrentCultureIgnoreCase));
+                .AnyAsync(s => s.Email.ToLower() == email.ToLower());
         }
         public async Task<bool> PhoneNumberExistsAsync(string phoneNumber)
         {

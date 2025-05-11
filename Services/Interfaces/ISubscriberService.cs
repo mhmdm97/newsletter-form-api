@@ -1,13 +1,13 @@
 using newsletter_form_api.Models.Dtos;
+using newsletter_form_api.Models.Results;
 
 namespace newsletter_form_api.Services.Interfaces
 {
     public interface ISubscriberService
     {
-        Task<SubscriberDto> CreateSubscriberAsync(CreateSubscriberDto createDto);
-        Task<SubscriberDto?> GetSubscriberByIdAsync(int id);
-        Task<List<SubscriberDto>> GetAllSubscribersAsync();
-        Task<bool> DeleteSubscriberAsync(int id);
-        Task<bool> SubscriberExistsAsync(string email);
+        Task<Result<SubscriberDto>> CreateSubscriberAsync(CreateSubscriberDto createDto);
+        Task<Result<SubscriberDto>> GetSubscriberByIdAsync(int id);
+        Task<Result<List<SubscriberDto>>> GetAllSubscribersAsync();
+        Task<Result> DeleteSubscriberAsync(int id);
     }
 }
