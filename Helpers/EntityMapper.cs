@@ -13,6 +13,7 @@ namespace newsletter_form_api.Helpers
                 Id = subscriber.Id,
                 Name = subscriber.Name,
                 Email = subscriber.Email,
+                PhoneNumber = subscriber.PhoneNumber,
                 Type = subscriber.Type,
                 Interests = [.. subscriber.Interests.Select(i => i.Name)],
                 CommunicationPreferences = [.. subscriber.CommunicationPreferences.Select(i => i.Tag)],
