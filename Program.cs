@@ -31,8 +31,8 @@ builder.Logging.AddOpenTelemetry(options =>
         .SetResourceBuilder(resourceBuilder)
         .AddOtlpExporter(a =>
         {
-            a.Endpoint = new Uri(builder.Configuration["OpenTelemetry:Endpoint"]);
-            a.Protocol = Enum.Parse<OtlpExportProtocol>(builder.Configuration["OpenTelemetry:Protocol"]);
+            a.Endpoint = new Uri(builder.Configuration["OpenTelemetry:Endpoint"]??"http://localhost:5341/ingest/otlp/v1/logs");
+            a.Protocol = Enum.Parse<OtlpExportProtocol>(builder.Configuration["OpenTelemetry:Protocol"]??"HttpProtobuf");
             a.Headers = builder.Configuration["OpenTelemetry:Headers"];
         });
 
