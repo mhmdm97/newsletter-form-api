@@ -72,7 +72,7 @@ Update the connection string in `appsettings.json`:
    ```
    dotnet run
    ```
-4. Access the Swagger UI at `https://localhost:5001/swagger`
+4. Access the Swagger UI at `https://localhost:7132/swagger`
 
 ## API Endpoints
 
